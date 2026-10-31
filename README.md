@@ -10,7 +10,7 @@ Stack: Next.js (App Router) · Supabase (Postgres, Auth, Storage) · Stripe · T
 1. **Foundation** — schema (`supabase/migrations`), photographer auth, env setup
 2. **Rosters and galleries** — create gallery, import roster (CSV), bulk photo upload, watermarked previews
 3. **Reference capture** — mobile page to snap a reference photo of each child, with consent flag
-4. **Photo Match** — face matching of gallery photos against references, review queue for low confidence
+4. **Photo Match** — local face-recognition service (e.g. InsightFace) compares faces in gallery photos to references via pgvector, review queue for low confidence
 5. **Family storefront** — family code opens that child's photos, lightbox, favorites
 6. **Cart and checkout** — price lists, packages, Stripe checkout and webhook
 7. **Orders** — admin dashboard, status flow, digital delivery, lab export
