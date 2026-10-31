@@ -4,6 +4,12 @@
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-02-20",
   "compatibility_flags": ["nodejs_compat"],
+  "vars": {
+    "NEXT_PUBLIC_SUPABASE_URL": "https://oathvggnprhshuyxipuz.supabase.co",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_l4r1omwUdHXa6hoYQ5vi6g_XzUV9Z53",
+    "R2_ACCOUNT_ID": "9bd8df37180cd63cdce66c22fcc288d6",
+    "R2_BUCKET": "easypixcart-photos"
+  },
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
