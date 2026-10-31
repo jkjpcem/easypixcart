@@ -12,7 +12,8 @@ async function createStudio(formData: FormData) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
-  await supabase.from("photographers").insert({ id: user.id, studio_name: String(formData.get("studio_name")) });
+  const { error } = await supabase.from("photographers").insert({ id: user.id, studio_name: String(formData.get("studio_name")) });
+  if (error) throw new Error(error.message);
   revalidatePath("/dashboard");
 }
 
@@ -23,7 +24,8 @@ async function createGallery(formData: FormData) {
   if (!user) redirect("/login");
   const title = String(formData.get("title"));
   const code = String(formData.get("access_code") || "") || null;
-  await supabase.from("galleries").insert({ photographer_id: user.id, title, slug: slugify(title), access_code: code });
+  const { error } = await supabase.from("galleries").insert({ photographer_id: user.id, title, slug: slugify(title), access_code: code });
+  if (error) throw new Error(error.message);
   revalidatePath("/dashboard");
 }
 
