@@ -21,3 +21,12 @@ export function signedUploadUrl(key: string, contentType: string, expiresIn = 90
 export function signedDownloadUrl(key: string, expiresIn = 3600) {
   return getSignedUrl(client, new GetObjectCommand({ Bucket: bucket, Key: key }), { expiresIn });
 }
+
+export async function getObjectBytes(key: string) {
+  const res = await client.send(new GetObjectCommand({ Bucket: bucket, Key: key }));
+  return Buffer.from(await res.Body!.transformToByteArray());
+}
+
+export function putObjectBytes(key: string, body: Buffer, contentType: string) {
+  return client.send(new PutObjectCommand({ Bucket: bucket, Key: key, Body: body, ContentType: contentType }));
+}

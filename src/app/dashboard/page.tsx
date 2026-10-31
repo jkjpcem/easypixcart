@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 
 function slugify(title: string) {
@@ -61,7 +62,7 @@ export default async function Dashboard() {
       <ul className="divide-y">
         {galleries?.map((g) => (
           <li key={g.id} className="flex justify-between py-3">
-            <span>{g.title}</span>
+            <Link href={`/dashboard/galleries/${g.id}`} className="underline">{g.title}</Link>
             <span className="text-sm text-gray-500">{g.status}</span>
           </li>
         ))}
