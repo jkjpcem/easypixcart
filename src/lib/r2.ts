@@ -22,11 +22,6 @@ export function signedDownloadUrl(key: string, expiresIn = 3600) {
   return getSignedUrl(client, new GetObjectCommand({ Bucket: bucket, Key: key }), { expiresIn });
 }
 
-export async function getObjectBytes(key: string) {
-  const res = await client.send(new GetObjectCommand({ Bucket: bucket, Key: key }));
-  return Buffer.from(await res.Body!.transformToByteArray());
-}
-
-export function putObjectBytes(key: string, body: Buffer, contentType: string) {
-  return client.send(new PutObjectCommand({ Bucket: bucket, Key: key, Body: body, ContentType: contentType }));
+export function thumbKeyFor(originalKey: string) {
+  return originalKey.replace("/originals/", "/thumbs/").replace(/\.[a-z0-9]+$/, ".jpg");
 }

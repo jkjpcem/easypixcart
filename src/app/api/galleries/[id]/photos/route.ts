@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
 import { createClient } from "@/lib/supabase/server";
-import { signedUploadUrl } from "@/lib/r2";
+import { signedUploadUrl, thumbKeyFor } from "@/lib/r2";
 
 const ALLOWED = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 // Step 1 of upload: register the photo and hand back a short-lived signed PUT URL.
-// The browser then uploads the original straight to R2, so large files never pass through our server.
+// The browser uploads the original and a thumbnail straight to R2, so large files never pass through our server.
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
@@ -26,5 +26,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     .from("photos").insert({ gallery_id: id, original_key: key }).select("id").single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  return NextResponse.json({ photoId: photo.id, uploadUrl: await signedUploadUrl(key, contentType) });
+  const [uploadUrl, thumbUploadUrl] = await Promise.all([
+    signedUploadUrl(key, contentType),
+    signedUploadUrl(thumbKeyFor(key), "image/jpeg"),
+  ]);
+  return NextResponse.json({ photoId: photo.id, uploadUrl, thumbUploadUrl });
 }

@@ -6,6 +6,20 @@ import { useRouter } from "next/navigation";
 type Item = { name: string; progress: number; status: "queued" | "uploading" | "processing" | "done" | "error"; error?: string };
 
 const CONCURRENCY = 3;
+const THUMB_MAX = 480;
+
+async function makeThumb(file: File) {
+  const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
+  const scale = Math.min(1, THUMB_MAX / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(bitmap.width * scale);
+  canvas.height = Math.round(bitmap.height * scale);
+  canvas.getContext("2d")!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  const blob = await new Promise<Blob>((resolve, reject) =>
+    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("Could not read image"))), "image/jpeg", 0.78),
+  );
+  return { blob, width: bitmap.width, height: bitmap.height };
+}
 
 function putWithProgress(url: string, file: File, onProgress: (pct: number) => void) {
   return new Promise<void>((resolve, reject) => {
@@ -39,7 +53,13 @@ export default function PhotoUploader({ galleryId }: { galleryId: string }) {
       if (!reg.ok) throw new Error(body.error ?? "Could not start upload");
       await putWithProgress(body.uploadUrl, file, (progress) => patch(i, { progress }));
       patch(i, { status: "processing", progress: 100 });
-      const done = await fetch(`/api/galleries/${galleryId}/photos/${body.photoId}/complete`, { method: "POST" });
+      const thumb = await makeThumb(file);
+      await putWithProgress(body.thumbUploadUrl, new File([thumb.blob], "thumb.jpg", { type: "image/jpeg" }), () => {});
+      const done = await fetch(`/api/galleries/${galleryId}/photos/${body.photoId}/complete`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ width: thumb.width, height: thumb.height }),
+      });
       if (!done.ok) throw new Error((await done.json()).error ?? "Processing failed");
       patch(i, { status: "done" });
     } catch (e) {
